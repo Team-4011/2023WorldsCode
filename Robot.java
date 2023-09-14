@@ -82,13 +82,13 @@ public class Robot extends TimedRobot {
 
   // camera
    UsbCamera opsCamera;
-   UsbCamera driveCamera;
+   
 
   // Limelight
 
   private Timer timer;
 
-  ADIS16470_IMU gyro = new ADIS16470_IMU();
+  //ADIS16470_IMU gyro = new ADIS16470_IMU();
 
 
 
@@ -103,7 +103,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    gyro.reset();
+   // gyro.reset();
     m_chooser.setDefaultOption("charge station auto", kDefaultAuto);
     m_chooser.addOption("High goal and move", kCustomAuto);
  
@@ -114,7 +114,7 @@ public class Robot extends TimedRobot {
 
     //camera
     opsCamera = CameraServer.startAutomaticCapture(1);//turned on camera for camera test do so in other code if this is not ran
-    driveCamera = CameraServer.startAutomaticCapture(0);
+    
 
     //config for drive train
    frontRightMasterFx.setInverted(true);
@@ -130,10 +130,10 @@ public class Robot extends TimedRobot {
    rearRightSlaveFx.setInverted(InvertType.FollowMaster);
    rearLeftSlaveFx.setInverted(InvertType.FollowMaster);
 
-    frontLeftMasterFx.configOpenloopRamp(0.1, 10);
-    frontRightMasterFx.configOpenloopRamp(0.1, 10);
-    rearLeftSlaveFx.configOpenloopRamp(0.1, 10);
-    rearRightSlaveFx.configOpenloopRamp(0.1, 10);
+    frontLeftMasterFx.configOpenloopRamp(0, 10);
+    frontRightMasterFx.configOpenloopRamp(0, 10);
+    rearLeftSlaveFx.configOpenloopRamp(0, 10);
+    rearRightSlaveFx.configOpenloopRamp(0, 10);
 
 
     frontRightMasterFx.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
@@ -346,58 +346,8 @@ public class Robot extends TimedRobot {
           timeSlice1Complete = true;
         } 
         
-         /*if ((frontLeftMasterFx.getSelectedSensorPosition() + frontRightMasterFx.getSelectedSensorPosition()) / 2 >= -10000 && timeSlice2Complete == false) {
-          System.out.println("entered backing up portion" + frontLeftMasterFx.getSelectedSensorPosition());
-          m_Drive.tankDrive(-0.45, -0.45);
-          if ((frontLeftMasterFx.getSelectedSensorPosition() + frontRightMasterFx.getSelectedSensorPosition()) / 2 >= 20000) {
-            System.out.println("")
-            m_Drive.tankDrive(0, 0);
-            timeSlice2Complete = true;
-          }
-          if ((frontLeftMasterFx.getSelectedSensorPosition() + frontRightMasterFx.getSelectedSensorPosition()) /2 <= -10000) {
-            System.out.println("reached -10000 " + frontLeftMasterFx.getSelectedSensorPosition());
-            m_Drive.tankDrive(0, 0);
-            timeSlice2Complete = true;
-          }
-         } else {m_Drive.tankDrive(0, 0); System.out.println("end driving " + frontLeftMasterFx.getSelectedSensorPosition());}*/
-        
-        /*if (elapsedTime < 18.1 && timeSlice2Complete == false) {
-          m_Drive.tankDrive(-0.49, -0.49);
-          Timer.delay(3.4);
-          m_Drive.tankDrive(0, 0);
-          Timer.delay(.5);
-          timeSlice2Complete = true;
-
-          System.out.println("end of drive");
-        } 
-        if (elapsedTime < 35 && timeSlice3Complete == false) {
-          System.out.println("enterd balance segment");
-          m_Drive.tankDrive(0.43, .43);
-          Timer.delay(1.8);
-        
-          
-           if (_Pigeon2.getPitch() <= -5) {
-            System.out.println("Pitch is greater than 5" + _Pigeon2.getPitch());
-            m_Drive.tankDrive(0.38, 0.38);
-            Timer.delay(2.1);
-            m_Drive.tankDrive(0, 0);
-            System.out.println("after .4 seconds" + _Pigeon2.getPitch());
-
-            
-            
-          }
-          
-          if(_Pigeon2.getPitch() >= -9 ) {
-            System.out.println("pitch is less than 11 degrees");
-            m_Drive.tankDrive(-0.455, -0.455);
-            Timer.delay(.615);
-            m_Drive.tankDrive(0, 0);
-            
-          }
-          timeSlice3Complete = true;
-          System.out.println("finished balancing");
-        }break;*/
-        while ((frontLeftMasterFx.getSelectedSensorPosition() + frontRightMasterFx.getSelectedSensorPosition()) /2 >= -126185) {
+       //-126185 to 
+        while ((frontLeftMasterFx.getSelectedSensorPosition() + frontRightMasterFx.getSelectedSensorPosition()) /2 >= -119755) {
 
           m_Drive.tankDrive(-0.50, -0.50);
           
@@ -405,30 +355,19 @@ public class Robot extends TimedRobot {
         System.out.println("stopDriving " + frontLeftMasterFx.getSelectedSensorPosition());
         m_Drive.tankDrive(0, 0);
         Timer.delay(0.1);
-        while ((frontLeftMasterFx.getSelectedSensorPosition() + frontRightMasterFx.getSelectedSensorPosition()) /2 <= -64500) {
+        while ((frontLeftMasterFx.getSelectedSensorPosition() + frontRightMasterFx.getSelectedSensorPosition()) /2 <= -66000) {
           m_Drive.tankDrive(0.45, 0.45);
         }
         m_Drive.tankDrive(0, 0);
-        /*while (_Pigeon2.getPitch() < 9) {
-          System.out.println("Entered drive forward " + _Pigeon2.getPitch());
-          m_Drive.tankDrive(0.45, 0.45);
-           if (_Pigeon2.getPitch() >= -5) {
-            System.out.println("slowing speed for climb " + _Pigeon2.getPitch());
-            m_Drive.tankDrive(0.38, 0.38);
-           }
-        }*/
-        /*while (_Pigeon2.getPitch() >= 5) {
-          System.out.println("back up to balace " + _Pigeon2.getPitch());
-          m_Drive.tankDrive(-0.49, -0.49);
-        }
-        m_Drive.tankDrive(0, 0);*/
-
-    }
+        
+    
 
     
     autocompleted = true;
+  
 
   }
+}
 
   @Override
   public void teleopInit() {
@@ -444,21 +383,21 @@ public class Robot extends TimedRobot {
     double speed = -(driveController.getLeftY());
     double turn = driveController.getRightX();
 
+    m_Drive.arcadeDrive(speed , turn );
 
-  
-    m_Drive.arcadeDrive(speed  , turn , true);
-
-
-
-    if (Math.abs(speed) < 0.05) {
-      speed = 0;
-    } else if (Math.abs(turn) < 0.05) {
-      turn = 0;
+    if (driveController.getRightTriggerAxis() == 1){
+      m_Drive.arcadeDrive(speed * .50, turn * .45);
     }
 
 
-    if(driveController.getRightTriggerAxis() == 1) {
-      m_Drive.arcadeDrive(speed * .45, turn * .35, true);
+  
+   // m_Drive.tankDrive(-driveController.getRightY(), -driveController.getLeftY(), true);
+    //m_Drive.tankDrive(-driveController.getRightY(), driveController.getRightY());
+
+     if (Math.abs(speed) < 0.05) {
+      speed = 5;
+    } else if (Math.abs(turn) < 0.05) {
+      turn = 0;
     }
                                         //reset ADIS gyro
     /*if (driveController.getYButton()) {
@@ -486,13 +425,6 @@ public class Robot extends TimedRobot {
     //**MOTION MAGIC
     // mechanism operations
 
-    /*if (operatorContorlBoard.getRawButton(9)) {
-      double armPreLoad = 10640;
-      double sliderPreLoad = 0;
-
-      armTalonFx.set(TalonFXControlMode.MotionMagic, armPreLoad);
-      sliderTalonFx.set(TalonFXControlMode.MotionMagic, sliderPreLoad);
-    }*/
 
     if (operatorContorlBoard.getRawButton(5)) {
       double armTargetPos1 = 46000;//from 43575 to 37729 to 40575 to 42075
@@ -548,13 +480,13 @@ public class Robot extends TimedRobot {
     }*/
 //button 4 is ok
     if (operatorContorlBoard.getRawButtonPressed(7)) {
-      intakeRollers.set(0.35);
+      intakeRollers.set(0.25);
     } else if (operatorContorlBoard.getRawButtonReleased(7)) {
       intakeRollers.stopMotor();
     } 
     //origanally button 2 mow button 3
     else if (operatorContorlBoard.getRawButtonPressed(8)) {
-      intakeRollers.set(-0.35);
+      intakeRollers.set(-0.25);
     } else if (operatorContorlBoard.getRawButtonReleased(8)) {
       intakeRollers.stopMotor();
     }
@@ -566,7 +498,7 @@ public class Robot extends TimedRobot {
     double pitch = _Pigeon2.getPitch();
 
     SmartDashboard.putNumber("pitch", _Pigeon2.getPitch());
-    SmartDashboard.putNumber("angle", gyro.getAngle());
+   // SmartDashboard.putNumber("angle", gyro.getAngle());
 
   }
 
