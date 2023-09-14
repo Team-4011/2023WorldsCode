@@ -1,5 +1,5 @@
 // Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
+// Open Source Software; you can modiffy and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
@@ -76,6 +76,11 @@ public class Robot extends TimedRobot {
   private WPI_TalonFX sliderTalonFx = new WPI_TalonFX(14);
   private CANSparkMax intakeRollers = new CANSparkMax(20, MotorType.kBrushless);
   private RelativeEncoder intakeEncoder;
+  private boolean m_button_6 = false;
+  private boolean m_button_1 = false;
+  private boolean m_button_2 = false;
+  private boolean m_button_5 = false;
+  private boolean m_button_4 = false;
 
   // other declarations for hardware
   private Pigeon2 _Pigeon2 = new Pigeon2(15);
@@ -88,13 +93,7 @@ public class Robot extends TimedRobot {
 
   private Timer timer;
 
-  //ADIS16470_IMU gyro = new ADIS16470_IMU();
-
-
-
- 
-  PIDController pid90 = new PIDController(0.038, 0.0, 0.008);//swithing p from 0.015 to 0.02 switching d from 0.005 to 0.007 to 0.008
-  PIDController pid180 = new PIDController(0.035, 0.00, 0.015);
+  
 
 
   /**
@@ -103,7 +102,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-   // gyro.reset();
+    
     m_chooser.setDefaultOption("charge station auto", kDefaultAuto);
     m_chooser.addOption("High goal and move", kCustomAuto);
  
@@ -113,7 +112,7 @@ public class Robot extends TimedRobot {
 
 
     //camera
-    opsCamera = CameraServer.startAutomaticCapture(1);//turned on camera for camera test do so in other code if this is not ran
+    opsCamera = CameraServer.startAutomaticCapture(0);//turned on camera for camera test do so in other code if this is not ran
     
 
     //config for drive train
@@ -130,10 +129,10 @@ public class Robot extends TimedRobot {
    rearRightSlaveFx.setInverted(InvertType.FollowMaster);
    rearLeftSlaveFx.setInverted(InvertType.FollowMaster);
 
-    frontLeftMasterFx.configOpenloopRamp(0, 10);
-    frontRightMasterFx.configOpenloopRamp(0, 10);
-    rearLeftSlaveFx.configOpenloopRamp(0, 10);
-    rearRightSlaveFx.configOpenloopRamp(0, 10);
+    frontLeftMasterFx.configOpenloopRamp(0.1, 10);
+    frontRightMasterFx.configOpenloopRamp(0.1, 10);
+    rearLeftSlaveFx.configOpenloopRamp(0.1, 10);
+    rearRightSlaveFx.configOpenloopRamp(0.1, 10);
 
 
     frontRightMasterFx.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
@@ -266,7 +265,7 @@ public class Robot extends TimedRobot {
 
      if (autocompleted) return;
     switch (m_autoSelected) {
-      case kCustomAuto:
+     /* case kCustomAuto:
         if (armTalonFx.getSelectedSensorPosition() < 70672 && function2Complete == false) {
           double armPos = 70672;//changed from 68550 to 70672
           double sliderPos = 49290;//changed from 61788 to 46500changed to 49290
@@ -310,7 +309,7 @@ public class Robot extends TimedRobot {
           }
           break;
 
-        }
+        }*/
     } 
     switch (m_autoSelected) {
       case kDefaultAuto:
@@ -330,7 +329,7 @@ public class Robot extends TimedRobot {
           Timer.delay(.5);
           sliderTalonFx.set(TalonFXControlMode.MotionMagic, sliderPos);
           Timer.delay(2.1);//2.5 little long going to 2.3
-          intakeRollers.set(-0.30);
+          intakeRollers.set(-0.20);//Revised back to pre huston speed changed from -0.30 to -0.20
           Timer.delay(.6);
           //System.out.println("stop motor part " + elapsedTime + "  " + autoStartTime);
           intakeRollers.set(0);
@@ -346,7 +345,7 @@ public class Robot extends TimedRobot {
           timeSlice1Complete = true;
         } 
         
-       //-126185 to 
+        
         while ((frontLeftMasterFx.getSelectedSensorPosition() + frontRightMasterFx.getSelectedSensorPosition()) /2 >= -119755) {
 
           m_Drive.tankDrive(-0.50, -0.50);
@@ -355,19 +354,19 @@ public class Robot extends TimedRobot {
         System.out.println("stopDriving " + frontLeftMasterFx.getSelectedSensorPosition());
         m_Drive.tankDrive(0, 0);
         Timer.delay(0.1);
-        while ((frontLeftMasterFx.getSelectedSensorPosition() + frontRightMasterFx.getSelectedSensorPosition()) /2 <= -66000) {
+        //changed from -66000 to -65500 to -65250
+        while ((frontLeftMasterFx.getSelectedSensorPosition() + frontRightMasterFx.getSelectedSensorPosition()) /2 <= -65250) {
           m_Drive.tankDrive(0.45, 0.45);
         }
         m_Drive.tankDrive(0, 0);
-        
-    
+      
+        break;
+    }
 
     
     autocompleted = true;
-  
-
+    
   }
-}
 
   @Override
   public void teleopInit() {
@@ -378,46 +377,27 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("left Encoder ticks", frontLeftMasterFx.getSelectedSensorPosition());
   
 
-
     // driveroperations
     double speed = -(driveController.getLeftY());
     double turn = driveController.getRightX();
 
-    m_Drive.arcadeDrive(speed , turn );
-
-    if (driveController.getRightTriggerAxis() == 1){
-      m_Drive.arcadeDrive(speed * .50, turn * .45);
-    }
-
 
   
-   // m_Drive.tankDrive(-driveController.getRightY(), -driveController.getLeftY(), true);
-    //m_Drive.tankDrive(-driveController.getRightY(), driveController.getRightY());
+    m_Drive.arcadeDrive(speed  , turn , true);
 
-     if (Math.abs(speed) < 0.05) {
-      speed = 5;
+
+
+    if (Math.abs(speed) < 0.05) {
+      speed = 0;
     } else if (Math.abs(turn) < 0.05) {
       turn = 0;
     }
-                                        //reset ADIS gyro
-    /*if (driveController.getYButton()) {
-      gyro.reset();
-     }
-                                        //turning to the right 90
-     if (driveController.getBButton()) {
-      pid90.setSetpoint(-90);
-      double sensor = gyro.getAngle();
-      double output = pid90.calculate(sensor);
-      m_Drive.tankDrive(output, -output);
-     }
-                                          //turning right 180
-     else if (driveController.getAButton()) {
-  
-      pid180.setSetpoint(-180);
-      double sensor = gyro.getAngle();
-      double output = pid180.calculate(sensor);
-      m_Drive.tankDrive(output, -output);
-     }*/
+
+
+    if(driveController.getRightTriggerAxis() == 1) {
+      m_Drive.arcadeDrive(speed * .45, turn * .35, true);
+    }
+   
     
  
     
@@ -425,11 +405,29 @@ public class Robot extends TimedRobot {
     //**MOTION MAGIC
     // mechanism operations
 
-
+    /*if (operatorContorlBoard.getRawButton(9)) {
+      double armPreLoad = 10640;
+      double sliderPreLoad = 0;
+      
+      armTalonFx.set(TalonFXControlMode.MotionMagic, armPreLoad);
+      sliderTalonFx.set(TalonFXControlMode.MotionMagic, sliderPreLoad);
+    }*/
+    
     if (operatorContorlBoard.getRawButton(5)) {
       double armTargetPos1 = 46000;//from 43575 to 37729 to 40575 to 42075
       double sliderTargetPos1 = 64500;//from 62553 to 49330  changed to 52289.8
-
+      
+      //
+      if(!m_button_5){
+        armTalonFx.configMotionAcceleration(5500, 10);//increasing fro 1600 to 2133 to do 60*/second changing 2133 to 3500
+        armTalonFx.configMotionCruiseVelocity(20500 , 10);//increasing from 3200 to 4267 to do 60*/second changing 4267 to 5500 up 
+        sliderTalonFx.configMotionAcceleration(6500, 10);//increasing acceleration to keep up with velocity from 3100 to 4100 up to 5500 up to 6500
+        sliderTalonFx.configMotionCruiseVelocity(22200, 10);// increasing cruise velocity from 5200 to 6200 to 7500 to 8500
+        m_button_5 = true;
+        };
+     
+      //
+      
       armTalonFx.set(ControlMode.MotionMagic, armTargetPos1);
       Timer.delay(.5);
       sliderTalonFx.set(TalonFXControlMode.MotionMagic, sliderTargetPos1);
@@ -440,15 +438,45 @@ public class Robot extends TimedRobot {
       double preHumanIntakeArm = 54840;
       double preHumanIntakeSlider = -38000; // -47523 to -40000 to -39000 to -38000 changed to -40280
 
+      //
+      if(!m_button_6){
+      armTalonFx.configMotionAcceleration(13000, 20);//increasing fro 1600 to 2133 to do 60*/second changing 2133 to 3500 changed to 5500 to 5750 up to 7000 for testing 10000 for testing to 11000 to 12000 to 13000 to 14000 to 13500 back to 13000
+      armTalonFx.configMotionCruiseVelocity(8000,20);//increasing from 3200 to 4267 to do 60*/second changing 4267 to 5500 up from 20500 to 5000 for test to 2000 for test to 7000 to 8000
+      sliderTalonFx.configMotionAcceleration(10000, 10);//increasing acceleration to keep up with velocity from 3100 to 4100 up to 5500 up to 6500 to 10000
+      sliderTalonFx.configMotionCruiseVelocity(6000, 10);// increasing cruise velocity from 5200 to 6200 to 7500 to 8500
+
+      m_button_6 = true;
+      };
+      
+
+
       armTalonFx.set(TalonFXControlMode.MotionMagic, preHumanIntakeArm);
-      Timer.delay(.5);
+      Timer.delay(.5);//changing from .5 to .3
       sliderTalonFx.set(TalonFXControlMode.MotionMagic, preHumanIntakeSlider);
-    } 
+    } else{
+      m_button_6 = false;
+      m_button_1 = false;
+      m_button_2 = false;
+      m_button_4 = false;
+      m_button_5 = false;
+      
+
+    }
      if (operatorContorlBoard.getRawButton(4)) {
       double humanIntakeArm = 52072; // 51000 to 52072
 
-      double humanIntakeSlider = 0; // -6777 to -33318 to -30318 changed to -32137.08
 
+      double humanIntakeSlider = 0; // -6777 to -33318 to -30318 changed to -32137.08
+      //
+      if(!m_button_4){
+        armTalonFx.configMotionAcceleration(13000, 20);//increasing fro 1600 to 2133 to do 60*/second changing 2133 to 3500 changed to 5500 to 5750 up to 7000 for testing 10000 for testing to 11000 to 12000 to 13000 to 14000 to 13500 back to 13000
+        armTalonFx.configMotionCruiseVelocity(8000,20);//increasing from 3200 to 4267 to do 60*/second changing 4267 to 5500 up from 20500 to 5000 for test to 2000 for test to 7000 to 8000
+        sliderTalonFx.configMotionAcceleration(10000, 10);//increasing acceleration to keep up with velocity from 3100 to 4100 up to 5500 up to 6500 to 10000
+        sliderTalonFx.configMotionCruiseVelocity(6000, 10);// increasing cruise velocity from 5200 to 6200 to 7500 to 8500
+  
+        m_button_4 = true;
+        };
+        //
       sliderTalonFx.set(TalonFXControlMode.MotionMagic, humanIntakeSlider);
       armTalonFx.set(TalonFXControlMode.MotionMagic, humanIntakeArm);
 
@@ -457,7 +485,13 @@ public class Robot extends TimedRobot {
     else if (operatorContorlBoard.getRawButton(1)) {
       double armTargetPos2 = 70672;//changing from 68550 to 70672 to 73585
       double sliderPos2 = 65495.28;//changing from 61788 to 50332 to 50011 to 48500 to 46500 changed to 65495.28 for double 4 slices
-
+      if(!m_button_1){
+        armTalonFx.configMotionAcceleration(5500, 10);//increasing fro 1600 to 2133 to do 60*/second changing 2133 to 3500
+        armTalonFx.configMotionCruiseVelocity(20500 , 10);//increasing from 3200 to 4267 to do 60*/second changing 4267 to 5500 up 
+        sliderTalonFx.configMotionAcceleration(6500, 10);//increasing acceleration to keep up with velocity from 3100 to 4100 up to 5500 up to 6500
+        sliderTalonFx.configMotionCruiseVelocity(22200, 10);// increasing cruise velocity from 5200 to 6200 to 7500 to 8500
+        m_button_1 = true;
+        };
       armTalonFx.set(TalonFXControlMode.MotionMagic, armTargetPos2);
       Timer.delay(.5);// down from .7 to .5
       sliderTalonFx.set(TalonFXControlMode.MotionMagic, sliderPos2);
@@ -465,6 +499,16 @@ public class Robot extends TimedRobot {
     } else if (operatorContorlBoard.getRawButton(2)) {
       double armTargetPos0 = 0;
       double sliderTargetPos0 = 0;
+
+      if(!m_button_2){
+        armTalonFx.configMotionAcceleration(5500, 10);//increasing fro 1600 to 2133 to do 60*/second changing 2133 to 3500 to 9500
+        armTalonFx.configMotionCruiseVelocity(6000 , 10);//increasing from 3200 to 4267 to do 60*/second changing 4267 to 5500 up  down to 6000
+        sliderTalonFx.configMotionAcceleration(6500, 10);//increasing acceleration to keep up with velocity from 3100 to 4100 up to 5500 up to 6500
+        
+
+        sliderTalonFx.configMotionCruiseVelocity(22200, 10);// increasing cruise velocity from 5200 to 6200 to 7500 to 8500
+        m_button_2 = true;
+        };
 
       sliderTalonFx.set(TalonFXControlMode.MotionMagic, sliderTargetPos0);
 
@@ -480,13 +524,13 @@ public class Robot extends TimedRobot {
     }*/
 //button 4 is ok
     if (operatorContorlBoard.getRawButtonPressed(7)) {
-      intakeRollers.set(0.25);
+      intakeRollers.set(0.15);//Revised back to pre huston speed changed from 0.25 to 0.15
     } else if (operatorContorlBoard.getRawButtonReleased(7)) {
       intakeRollers.stopMotor();
     } 
     //origanally button 2 mow button 3
     else if (operatorContorlBoard.getRawButtonPressed(8)) {
-      intakeRollers.set(-0.25);
+      intakeRollers.set(-0.15);//Revised back to pre huston speed changed from -0.25  to -0.15
     } else if (operatorContorlBoard.getRawButtonReleased(8)) {
       intakeRollers.stopMotor();
     }
@@ -498,7 +542,8 @@ public class Robot extends TimedRobot {
     double pitch = _Pigeon2.getPitch();
 
     SmartDashboard.putNumber("pitch", _Pigeon2.getPitch());
-   // SmartDashboard.putNumber("angle", gyro.getAngle());
+    
+    
 
   }
 
